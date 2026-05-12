@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Training Log">
+<meta name="theme-color" content="#000000">
+<title>Training Log</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'%3E%3Crect width='1024' height='1024' fill='%23000'/%3E%3Crect x='80' y='470' width='864' height='84' rx='42' fill='%23fff'/%3E%3Crect x='80' y='360' width='160' height='304' rx='50' fill='%23fff'/%3E%3Crect x='784' y='360' width='160' height='304' rx='50' fill='%23fff'/%3E%3Crect x='20' y='410' width='120' height='204' rx='40' fill='%23fff'/%3E%3Crect x='884' y='410' width='120' height='204' rx='40' fill='%23fff'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bk:#000;--wh:#fff;--g50:#f7f7f7;--g100:#efefef;--g200:#ddd;--g300:#bbb;--g400:#999;--g500:#666;--g700:#333;--g900:#111;--safe-b:env(safe-area-inset-bottom,16px);--fh:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif;--fm:'Space Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:var(--fb);background:var(--wh);color:var(--bk);max-width:430px;margin:0 auto;overflow-x:hidden;}
+.screen{display:none;min-height:100vh;padding-bottom:calc(68px + var(--safe-b));}
+.screen.active{display:block;}
+.ph{padding:52px 20px 16px;border-bottom:1px solid var(--g100);position:relative;}
+.ph::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--bk);}
+.ph-eye{font-family:var(--fm);font-size:10px;letter-spacing:.12em;color:var(--g400);text-transform:uppercase;margin-bottom:4px;}
+.ph-title{font-family:var(--fh);font-size:38px;font-weight:700;letter-spacing:-.01em;line-height:1;text-transform:uppercase;}
+.ph-sub{font-size:13px;color:var(--g500);margin-top:4px;}
+.ph-row{display:flex;justify-content:space-between;align-items:flex-end;}
+.add-btn{width:34px;height:34px;background:var(--bk);color:var(--wh);border:none;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--bk);display:flex;padding:0 0 var(--safe-b);z-index:200;}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:12px 0 8px;}
+.ni{font-family:var(--fm);font-size:15px;color:var(--g500);line-height:1;}
+.nl{font-family:var(--fm);font-size:9px;letter-spacing:.08em;color:var(--g500);text-transform:uppercase;}
+.nb.active .ni,.nb.active .nl{color:var(--wh);}
+.day-strip{display:flex;border-bottom:1px solid var(--g100);overflow-x:auto;scrollbar-width:none;}
+.day-strip::-webkit-scrollbar{display:none;}
+.dt{flex-shrink:0;padding:11px 16px;font-family:var(--fm);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--g400);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .15s;}
+.dt .p{display:block;font-size:9px;color:var(--g300);margin-top:2px;text-align:center;}
+.dt.active{color:var(--bk);border-bottom-color:var(--bk);}
+.dt.active .p{color:var(--g500);}
+.sbanner{padding:14px 20px;border-bottom:1px solid var(--g100);display:flex;align-items:center;gap:14px;}
+.sring{width:52px;height:52px;flex-shrink:0;position:relative;}
+.sring svg{width:52px;height:52px;transform:rotate(-90deg);}
+.rbg{fill:none;stroke:var(--g100);stroke-width:3;}
+.rfill{fill:none;stroke:var(--bk);stroke-width:3;stroke-linecap:round;transition:stroke-dashoffset .5s ease;}
+.rlbl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:11px;font-weight:700;}
+.sinfo{flex:1;}
+.sday{font-family:var(--fh);font-size:22px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;line-height:1;}
+.sfocus{font-size:13px;color:var(--g500);margin-top:3px;}
+.snote{font-size:11px;color:var(--g400);margin-top:3px;line-height:1.5;font-style:italic;}
+.wu{padding:10px 20px;border-bottom:1px solid var(--g100);display:flex;gap:8px;align-items:flex-start;}
+.wu-tag{font-family:var(--fm);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--wh);background:var(--bk);padding:3px 8px;border-radius:2px;flex-shrink:0;margin-top:1px;}
+.wu-items{font-size:12px;color:var(--g500);line-height:1.7;}
+.slbl{padding:12px 20px 6px;font-family:var(--fm);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--g400);display:flex;align-items:center;gap:8px;}
+.slbl::after{content:'';flex:1;height:1px;background:var(--g100);}
+.slbl.sk{color:var(--bk);}
+.exlist{padding:0 12px;}
+.ec{background:var(--wh);border:1px solid var(--g100);border-radius:10px;margin-bottom:7px;overflow:hidden;}
+.ec.sk{border-left:3px solid var(--bk);}
+.ec.cp{background:var(--g50);border-color:var(--g200);}
+.etop{display:flex;align-items:center;padding:12px 14px;gap:11px;cursor:pointer;}
+.ecirc{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--g300);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;cursor:pointer;}
+.ecirc.done{background:var(--bk);border-color:var(--bk);}
+.ecirc.done::after{content:'';width:6px;height:10px;border:2px solid var(--wh);border-top:none;border-left:none;transform:rotate(45deg) translateY(-1px);display:block;}
+.ebody{flex:1;min-width:0;}
+.ename{font-size:14px;font-weight:500;color:var(--bk);line-height:1.3;}
+.ename.done{color:var(--g400);text-decoration:line-through;}
+.epills{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;}
+.pill{font-family:var(--fm);font-size:9px;letter-spacing:.05em;padding:2px 6px;border-radius:2px;text-transform:uppercase;}
+.p-sets{background:var(--g100);color:var(--g700);}
+.p-sk{background:var(--bk);color:var(--wh);}
+.p-ss{background:var(--g900);color:var(--wh);}
+.p-ms{background:#fff3cd;color:#7a5c00;border:1px solid #f0d870;}
+.p-msd{background:#e6f4ea;color:#1a5c2e;border:1px solid #a8d5b5;}
+.echev{font-family:var(--fm);font-size:12px;color:var(--g300);transition:transform .2s;flex-shrink:0;}
+.echev.open{transform:rotate(180deg);}
+.edet{display:none;padding:0 14px 12px;border-top:1px solid var(--g100);}
+.edet.open{display:block;}
+.etip{font-size:13px;color:var(--g500);line-height:1.65;padding-top:10px;}
+.msbox{margin-top:10px;border:1px solid var(--g200);border-radius:6px;padding:9px 12px;background:var(--g50);}
+.mslbl{font-family:var(--fm);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--g400);margin-bottom:5px;}
+.msrow{display:flex;align-items:center;gap:8px;}
+.mscheck{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--g300);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.mscheck.done{background:var(--bk);border-color:var(--bk);}
+.mscheck.done::after{content:'';width:4px;height:7px;border:1.5px solid var(--wh);border-top:none;border-left:none;transform:rotate(45deg) translateY(-1px);display:block;}
+.mstxt{font-size:12px;color:var(--g500);}
+.mstxt.done{text-decoration:line-through;color:var(--g300);}
+.setsrow{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.setbox{width:34px;height:34px;border:1px solid var(--g200);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:11px;color:var(--g500);cursor:pointer;transition:all .15s;}
+.setbox.done{background:var(--bk);color:var(--wh);border-color:var(--bk);}
+.enote{width:100%;margin-top:10px;border:1px solid var(--g200);border-radius:6px;padding:8px 10px;font-family:var(--fb);font-size:13px;color:var(--bk);background:var(--wh);resize:none;outline:none;min-height:50px;line-height:1.5;}
+.enote::placeholder{color:var(--g300);}
+.enote:focus{border-color:var(--bk);}
+.eacts{display:flex;gap:6px;margin-top:8px;}
+.ebtn{flex:1;padding:7px 10px;font-family:var(--fm);font-size:10px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--g200);border-radius:6px;background:var(--wh);color:var(--g500);cursor:pointer;}
+.ebtn.del{color:#c0392b;border-color:#fde;background:#fff9f9;}
+.spad{padding:16px 20px 0;}
+.kgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:16px;}
+.kpi{background:var(--g50);border:1px solid var(--g100);border-radius:10px;padding:14px;}
+.kl{font-family:var(--fm);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--g400);margin-bottom:6px;}
+.kv{font-family:var(--fh);font-size:32px;font-weight:700;letter-spacing:-.01em;line-height:1;}
+.ku{font-size:14px;font-weight:400;color:var(--g400);}
+.ks{font-size:11px;color:var(--g400);margin-top:3px;}
+.kb{height:3px;background:var(--g200);border-radius:2px;margin-top:8px;overflow:hidden;}
+.kbf{height:100%;background:var(--bk);border-radius:2px;transition:width .5s ease;}
+.btitle{font-family:var(--fh);font-size:16px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--g100);}
+.dotgrid{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;}
+.dot{width:22px;height:22px;border-radius:4px;background:var(--g100);border:1px solid var(--g200);}
+.dot.done{background:var(--bk);border-color:var(--bk);}
+.dot.partial{background:var(--g300);border-color:var(--g300);}
+.dot.today{outline:2px solid var(--bk);outline-offset:2px;}
+.dleg{display:flex;gap:14px;font-family:var(--fm);font-size:10px;color:var(--g400);margin-bottom:16px;}
+.dleg span{display:flex;align-items:center;gap:5px;}
+.dleg i{width:10px;height:10px;border-radius:2px;display:inline-block;}
+.prow{margin-bottom:14px;}
+.phead{display:flex;justify-content:space-between;margin-bottom:5px;}
+.pname{font-size:13px;font-weight:500;}
+.pval{font-family:var(--fm);font-size:11px;color:var(--g400);}
+.pbg{height:5px;background:var(--g100);border-radius:3px;overflow:hidden;}
+.pfill{height:100%;background:var(--bk);border-radius:3px;transition:width .5s ease;}
+.psub{font-size:11px;color:var(--g400);margin-top:3px;font-style:italic;}
+.lentry{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--g50);}
+.lentry:last-child{border-bottom:none;}
+.ldate{font-family:var(--fm);font-size:10px;color:var(--g400);min-width:58px;padding-top:2px;}
+.lbody{flex:1;}
+.lmet{font-size:13px;font-weight:500;}
+.lval{font-size:12px;color:var(--g500);margin-top:1px;}
+.empty{font-size:13px;color:var(--g400);text-align:center;padding:28px 0;font-style:italic;}
+.sfrow{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;margin-bottom:12px;}
+.sfrow::-webkit-scrollbar{display:none;}
+.sfb{flex-shrink:0;font-family:var(--fm);font-size:10px;letter-spacing:.05em;text-transform:uppercase;padding:5px 12px;border-radius:2px;border:1px solid var(--g200);background:var(--wh);color:var(--g500);cursor:pointer;}
+.sfb.active{background:var(--bk);color:var(--wh);border-color:var(--bk);}
+.sphase{font-family:var(--fm);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--g400);padding:10px 0 6px;display:flex;justify-content:space-between;}
+.skc{background:var(--wh);border:1px solid var(--g100);border-radius:8px;margin-bottom:6px;overflow:hidden;}
+.skc.skdone{opacity:.65;}
+.skrow{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;}
+.skcheck{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--g300);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.skcheck.done{background:var(--bk);border-color:var(--bk);}
+.skcheck.done::after{content:'';width:5px;height:8px;border:1.5px solid var(--wh);border-top:none;border-left:none;transform:rotate(45deg) translateY(-1px);display:block;}
+.skbody{flex:1;min-width:0;}
+.skname{font-size:13px;font-weight:500;}
+.skname.done{text-decoration:line-through;color:var(--g400);}
+.sktags{display:flex;gap:4px;margin-top:3px;flex-wrap:wrap;}
+.skt{font-size:9px;font-family:var(--fm);padding:2px 6px;border-radius:2px;letter-spacing:.04em;text-transform:uppercase;}
+.skt.push{background:#fde;color:#a0001a;}
+.skt.pull{background:#def;color:#003c80;}
+.skt.core{background:#ede;color:#4a006b;}
+.skt.balance{background:#dfd;color:#005022;}
+.skt.mobility{background:#fed;color:#7a3c00;}
+.skt.inp{background:var(--bk);color:var(--wh);}
+.skdet{display:none;padding:0 14px 12px;border-top:1px solid var(--g100);}
+.skdet.open{display:block;}
+.sktip{font-size:12px;color:var(--g500);line-height:1.65;padding-top:10px;}
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;align-items:flex-end;justify-content:center;}
+.mo.open{display:flex;}
+.md{background:var(--wh);width:100%;max-width:430px;border-radius:16px 16px 0 0;padding:20px 20px calc(20px + var(--safe-b));max-height:85vh;overflow-y:auto;}
+.mh{width:36px;height:4px;background:var(--g200);border-radius:2px;margin:0 auto 18px;}
+.mt{font-family:var(--fh);font-size:22px;font-weight:700;text-transform:uppercase;margin-bottom:16px;}
+.mf{margin-bottom:12px;}
+.ml{font-family:var(--fm);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--g400);margin-bottom:6px;}
+.mi{width:100%;border:1px solid var(--g200);border-radius:6px;padding:11px 13px;font-family:var(--fb);font-size:15px;outline:none;background:var(--g50);}
+.mi:focus{border-color:var(--bk);background:var(--wh);}
+.mcta{width:100%;padding:14px;background:var(--bk);color:var(--wh);border:none;border-radius:8px;font-family:var(--fh);font-size:18px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;margin-top:8px;}
+.mcan{width:100%;padding:12px;background:var(--wh);color:var(--g500);border:1px solid var(--g200);border-radius:8px;font-family:var(--fm);font-size:12px;cursor:pointer;margin-top:8px;}
+</style>
+</head>
+<body>
+
+<div class="screen active" id="screen-train">
+  <div class="ph">
+    <div class="ph-eye" id="train-date"></div>
+    <div class="ph-title">Training</div>
+  </div>
+  <div class="day-strip" id="dayStrip"></div>
+  <div id="sessionContent"></div>
+</div>
+
+<div class="screen" id="screen-skills">
+  <div class="ph">
+    <div class="ph-eye">Skill roadmap</div>
+    <div class="ph-title">Skills</div>
+    <div class="ph-sub" id="skills-sub"></div>
+  </div>
+  <div style="padding:14px 20px 0;">
+    <div class="sfrow" id="skillFilters"></div>
+    <div id="skillList"></div>
+  </div>
+</div>
+
+<div class="screen" id="screen-progress">
+  <div class="ph">
+    <div class="ph-row">
+      <div><div class="ph-eye" id="prog-date"></div><div class="ph-title">Progress</div></div>
+      <button class="add-btn" onclick="openLogModal()">+</button>
+    </div>
+  </div>
+  <div class="spad">
+    <div class="kgrid" id="kpiGrid"></div>
+    <div class="btitle">28-day activity</div>
+    <div class="dotgrid" id="dotGrid"></div>
+    <div class="dleg">
+      <span><i style="background:var(--bk)"></i>Done</span>
+      <span><i style="background:var(--g300)"></i>Partial</span>
+      <span><i style="background:var(--g100);border:1px solid var(--g200)"></i>Missed</span>
+    </div>
+    <div class="btitle">Training by day</div>
+    <div id="trainBars"></div>
+    <div class="btitle" style="margin-top:16px;">Skill progression</div>
+    <div id="skillBars"></div>
+    <div class="btitle" style="margin-top:16px;">Recent log</div>
+    <div id="logList"></div>
+    <div style="height:16px;"></div>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nb active" id="nav-train" onclick="showScreen('train')">
+    <span class="ni">[o]</span><span class="nl">Train</span>
+  </button>
+  <button class="nb" id="nav-skills" onclick="showScreen('skills')">
+    <span class="ni">/\/</span><span class="nl">Skills</span>
+  </button>
+  <button class="nb" id="nav-progress" onclick="showScreen('progress')">
+    <span class="ni">|||</span><span class="nl">Progress</span>
+  </button>
+</nav>
+
+<div class="mo" id="modal-ex">
+  <div class="md">
+    <div class="mh"></div>
+    <div class="mt">Add exercise</div>
+    <div class="mf"><div class="ml">Name</div><input class="mi" id="new-ex-name" placeholder="e.g. Wall handstand hold"></div>
+    <div class="mf"><div class="ml">Sets & reps</div><input class="mi" id="new-ex-sets" placeholder="e.g. 4 × 10"></div>
+    <div class="mf"><div class="ml">Coaching tip (optional)</div><input class="mi" id="new-ex-tip" placeholder="e.g. Keep hips square"></div>
+    <div class="mf"><div class="ml">Milestone (optional)</div><input class="mi" id="new-ex-ms" placeholder="e.g. Hold 30s consistently"></div>
+    <div class="mf"><div class="ml">Section</div>
+      <select class="mi" id="new-ex-section">
+        <option>Skill block</option><option>Strength block</option><option>Core block</option><option>Mobility block</option><option>Circuit</option>
+      </select>
+    </div>
+    <button class="mcta" onclick="saveExercise()">Save</button>
+    <button class="mcan" onclick="closeModal('modal-ex')">Cancel</button>
+  </div>
+</div>
+
+<div class="mo" id="modal-log">
+  <div class="md">
+    <div class="mh"></div>
+    <div class="mt">Log progress</div>
+    <div class="mf"><div class="ml">Metric</div>
+      <select class="mi" id="log-metric">
+        <option>Handstand hold (seconds)</option>
+        <option>L-sit hold (seconds)</option>
+        <option>Pull-ups (reps)</option>
+        <option>Pike push-ups (reps)</option>
+        <option>Bodyweight (kg)</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="mf"><div class="ml">Value</div><input class="mi" id="log-val" type="number" placeholder="e.g. 15"></div>
+    <div class="mf"><div class="ml">Note (optional)</div><input class="mi" id="log-note" placeholder="e.g. Felt strong today"></div>
+    <button class="mcta" onclick="saveLog()">Save</button>
+    <button class="mcan" onclick="closeModal('modal-log')">Cancel</button>
+  </div>
+</div>
+
+<script>
+const DO=['Monday','Tuesday','Wednesday','Thursday','Friday'];
+const DP={
+Monday:{focus:'Handstand + Push strength',note:'Skill first, always. Shoulder volume day.',warmup:['Wrist prep 3 min','Shoulder circles','Cat-cow x10','Downward dog 30s','5 min skip'],sections:{'Skill block':[
+{id:'m1',name:'Calisthenics plank',sets:'3 × 30s',tip:'Push shoulders down and forward. Drive elbows down, crunch lower abs, squeeze glutes. Straight line heels to upper back.',milestone:'Solid 30s with full protraction',skill:true,note:''},
+{id:'m2',name:'Hollow body hold',sets:'4 × 30s',tip:'Press lower back flat to floor. Arms overhead. This is the handstand held horizontally.',milestone:'30s unbroken, lower back flat',skill:true,note:''},
+{id:'m3',name:'Wall handstand hold',sets:'5 × max hold',tip:'Chest to wall. Push ground away. Aim 20–30s. Film from side — check for banana back.',milestone:'Hold 30s consistently',skill:true,note:''},
+{id:'m4',name:'Shoulder taps in wall HS',sets:'3 × 8 taps',tip:'Shift weight over one arm before lifting. Slow and controlled. First step toward freestanding.',milestone:'8 clean taps without losing position',skill:true,note:''},
+],'Strength block':[
+{id:'m5',name:'Pike push-up',sets:'4 × 12',tip:'Triangle position. Shift weight forward so nose moves toward floor ahead of hands. Elbows over wrists.',milestone:'4 × 12 clean reps',skill:false,note:''},
+{id:'m6',name:'Planche lean',sets:'4 × 20s',tip:'Fingers at 45°, thumb forward. Squeeze collarbones. Lean forward with perfect scapular protraction.',milestone:'20s hold with hips level',skill:true,note:''},
+{id:'m7',name:'Elevated push-ups + dips',sets:'3 × 10 each',tip:'Superset — no rest between. Elevated push-ups first, straight into dips. Rest 60s after both.',skill:false,superset:true,note:''},
+{id:'m8',name:'Diamond push-ups',sets:'3 × 12',tip:'Elbows close throughout. 1s pause at bottom each rep.',skill:false,note:''},
+]}},
+Tuesday:{focus:'Pull strength + L-sit',note:'L-sit skill leads. Pull with tempo not ego. Slow negatives build strength.',warmup:['5 min skip','Dead hang 45s','Scapular pulls x10','Band pull-aparts x15','Wrist stretch'],sections:{'Skill block':[
+{id:'t1',name:'Hollow body hang',sets:'3 × 20s',tip:'Active hang — shoulders drawn down and back, thighs squeezed. Whole body rigid.',milestone:'20s active hang, fully rigid',skill:true,note:''},
+{id:'t2',name:'Compact leg lifts',sets:'3 × 10',tip:'Sit and lift legs with hands at knee level. Builds core compression that L-sit requires.',milestone:'10 clean reps, hips not rocking',skill:true,note:''},
+{id:'t3',name:'L-sit on dip bars',sets:'5 × max hold',tip:'Full L if possible — tuck first, then push one leg out for 2s. Rest 60s between sets.',milestone:'Hold 10s full L-sit',skill:true,note:''},
+],'Strength block':[
+{id:'t4',name:'Pull-ups — tempo',sets:'4 × 8',tip:'2s up, 1s hold at top, 3s down. Full dead hang each rep. No kipping.',skill:false,note:''},
+{id:'t5',name:'Archer pull-ups',sets:'3 × 5 each side',tip:'At top, extend one arm straight while other stays bent. Alternate. Path toward one-arm pull-up.',milestone:'5 clean reps each side',skill:false,note:''},
+{id:'t6',name:'Chin-ups + Australian rows',sets:'3 × 8 each',tip:'Superset — chin-ups first, straight into rows. Rest 90s after.',skill:false,superset:true,note:''},
+{id:'t7',name:'Dead hang',sets:'2 × 60s',tip:'Full relaxation. Shoulder decompression and grip endurance.',skill:false,note:''},
+]}},
+Wednesday:{focus:'Handstand skill + Core',note:'Dedicated skill day. Lower intensity, maximum focus.',warmup:['5 min skip','Wrist prep 3 min','Thoracic rotations x10','Hip flexor stretch 60s each','Downward dog holds'],sections:{'Skill block':[
+{id:'w1',name:'Crow pose practice',sets:'5 × 20s',tip:'Elbows stick into knees. Look one metre ahead. Progress: hold → lift one foot → both.',milestone:'Hold 20s stable',skill:true,note:''},
+{id:'w2',name:'Wall-facing HS hold',sets:'3 × 30s',tip:'Chest to wall. Forces hollow body — no arch possible.',milestone:'30s chest-to-wall hold',skill:true,note:''},
+{id:'w3',name:'Kick-up to wall + hold',sets:'10 min practice',tip:'Consistent entry = consistent balance. Drive through shoulders at kick-up.',skill:true,note:''},
+{id:'w4',name:'Freestanding attempts',sets:'5 min',tip:'Kick up and try to catch it. Press fingertips to fall back. 3s is a win.',milestone:'First 3s freestanding balance',skill:true,note:''},
+],'Core block':[
+{id:'w5',name:'L-sit on dip bars',sets:'4 × max hold',tip:'Second session this week. Aim to beat Tuesday by 1–2 seconds.',skill:false,note:''},
+{id:'w6',name:'Hanging leg raises',sets:'3 × 12',tip:'Dead hang start. No swing. Slow 3s descent.',skill:false,note:''},
+{id:'w7',name:'Ab wheel rollout',sets:'3 × 8',tip:'From knees. Slow rollout, pause at extension, pull back with core.',skill:false,note:''},
+{id:'w8',name:'Side plank',sets:'3 × 30s each',tip:'Hips up, body straight. Elevate top leg when ready.',skill:false,note:''},
+]}},
+Thursday:{focus:'Shoulder strength + Mobility',note:'Heaviest shoulder session. Mobility at the end is what keeps you training.',warmup:['5 min skip','Band pull-aparts x15','Wrist circles 2 min','Wall slides x10','Chest opener 30s'],sections:{'Skill block':[
+{id:'th1',name:'Pseudo planche lean',sets:'4 × 20s',tip:'Protracted scapula, straight arms. The further shoulders are over wrists, the harder.',milestone:'20s lean, shoulders over wrists',skill:true,note:''},
+{id:'th2',name:'Pseudo planche push-up',sets:'3 × 8',tip:'Add a push-up to the lean. Front delt does the work. Start shallow and progress.',milestone:'8 reps with controlled lean',skill:true,note:''},
+{id:'th3',name:'Pike push-up deficit',sets:'4 × 8',tip:'Feet on a box. Deeper range. Progress: flat → elevated → wall handstand push-up.',milestone:'4 × 8 with feet elevated',skill:false,note:''},
+{id:'th4',name:'Handstand shoulder shrugs',sets:'3 × 10',tip:'In wall handstand. Push shoulders up and down. Small movement, massive scapular effect.',skill:true,note:''},
+{id:'th5',name:'Pike push-up isometric hold',sets:'3 × 20s',tip:'Hold the bottom. Elbows at 90°, head through. Time under tension.',skill:false,note:''},
+],'Mobility block':[
+{id:'th6',name:'Wrist stretches — all directions',sets:'3 min',tip:'Flexion, extension, circles, prayer, reverse prayer. Your wrists carry full bodyweight.',skill:false,note:''},
+{id:'th7',name:'Butcher block / shoulder opener',sets:'2 × 60s',tip:'Opens shoulders for straight handstand. Use a bar or stick.',milestone:'Full overhead range both arms',skill:true,note:''},
+{id:'th8',name:'Shoulder dislocates with band',sets:'2 × 15',tip:'Wide grip band. Slow overhead and behind. Uncomfortable = working.',skill:false,note:''},
+{id:'th9',name:'Hip flexor stretch',sets:'2 × 60s each',tip:'Low lunge. Back knee down. Tight hip flexors limit L-sit and handstand.',skill:false,note:''},
+]}},
+Friday:{focus:'Full body — Heria circuit',note:'4 rounds, 30s work / 15s rest, 90s between rounds. Everything hurts by round 3.',warmup:['5 min skip','Jump squats x10','Arm circles','Hip circles','Push-up walkout x5'],sections:{'Skill opener':[
+{id:'f1',name:'Elbow lever practice',sets:'5 × attempts',tip:'Elbows into hip bones. Shift weight forward over wrists. Flat frog → straddle → full.',milestone:'Hold 5s flat frog position',skill:true,note:''},
+{id:'f2',name:'Wall handstand holds',sets:'5 × max hold',tip:'Fresher than after the circuit. Aim to beat Monday times.',skill:true,note:''},
+],'Circuit':[
+{id:'f3',name:'Pull-ups',sets:'30s on / 15s rest',tip:'Max controlled reps. Stop when form breaks.',skill:false,note:''},
+{id:'f4',name:'Elevated push-ups',sets:'30s on / 15s rest',tip:'Feet up, chest to floor. Maintain hollow body.',skill:false,note:''},
+{id:'f5',name:'Dips',sets:'30s on / 15s rest',tip:'Full range. Lean forward slightly.',skill:false,note:''},
+{id:'f6',name:'L-sit hold or tuck',sets:'30s on / 15s rest',tip:'Hold as long as possible. Rest in tuck not on floor.',skill:false,note:''},
+{id:'f7',name:'Pike push-ups',sets:'30s on / 15s rest',tip:"Keep the inverted V. Don't let hips drop.",skill:false,note:''},
+{id:'f8',name:'Hollow body rocks',sets:'30s on / 15s rest',tip:'Rock shoulders to heels. Lower back stays pressed down.',skill:false,note:''},
+{id:'f9',name:'Mountain climbers',sets:'30s on / 15s rest',tip:'Drive knees to chest. Stay tight.',skill:false,note:''},
+{id:'f10',name:'Hanging leg raises',sets:'30s on / 15s rest',tip:'Slow on the way down. No swing.',skill:false,note:''},
+]}}
+};
+const SD=[
+{id:1,name:'Calisthenics plank',phase:'Phase 1 — Foundations',tags:['core'],tip:'Push shoulders down and forward. Drive elbows down, crunch lower abs, squeeze glutes.',inP:true},
+{id:2,name:'Hollow body hold',phase:'Phase 1 — Foundations',tags:['core'],tip:'Press lower back into floor. Shoulders and legs lift. Arms overhead. This IS the handstand — horizontal.',inP:true},
+{id:3,name:'Frog stand',phase:'Phase 1 — Foundations',tags:['balance'],tip:'Elbows stick into knees. Use fingertips, knuckles, palms as balance points. Look slightly forward.',inP:false},
+{id:4,name:'Crow pose',phase:'Phase 1 — Foundations',tags:['balance'],tip:'Rest knees between heads of triceps. Look one metre ahead. Keeps torso upright.',inP:true},
+{id:5,name:'Planche lean',phase:'Phase 1 — Foundations',tags:['push'],tip:'Fingers at 45°, thumb forward. Squeeze collarbones. Lean forward with perfect protraction.',inP:true},
+{id:6,name:'Pseudo planche lean',phase:'Phase 1 — Foundations',tags:['push'],tip:'Protracted scapula, straight arms. The further shoulders are over wrists, the harder.',inP:true},
+{id:7,name:'Pseudo planche push-up',phase:'Phase 1 — Foundations',tags:['push'],tip:'Add a push-up to the lean. Front delt strength essential. Start shallow, progress lean over weeks.',inP:true},
+{id:8,name:'Hanging leg raise',phase:'Phase 2 — Pulling & Mobility',tags:['core','pull'],tip:'Dead hang, elbows extended. No momentum or swing. Only legs move. Slow descent.',inP:true},
+{id:9,name:'Hollow body hang',phase:'Phase 2 — Pulling & Mobility',tags:['core','pull'],tip:'Active hang — shoulders down and back, thighs squeezed. Whole body one rigid unit.',inP:true},
+{id:10,name:'Tuck front lever',phase:'Phase 2 — Pulling & Mobility',tags:['pull'],tip:'Pull knees to chest with straight arms until horizontal. Tight tuck → 90° → straddle → full.',inP:false},
+{id:11,name:'Elbow lever',phase:'Phase 2 — Pulling & Mobility',tags:['balance'],tip:'Elbows into fleshy part just inside hip bones. Shift weight forward. Flat frog → straddle → full.',inP:true},
+{id:12,name:'German hang',phase:'Phase 2 — Pulling & Mobility',tags:['mobility'],tip:'Lower feet past the bar. Passive end-range shoulder strength. Very slow — intense on the joint.',inP:false},
+{id:13,name:'Butcher block',phase:'Phase 2 — Pulling & Mobility',tags:['mobility'],tip:'Opens shoulders for straight handstand overhead position. Use a bar or stick.',inP:true},
+{id:14,name:'Wall handstand hold',phase:'Phase 3 — Inversion',tags:['balance','push'],tip:'Walk feet up wall, chest to wall. Push ground away, imagine rope pulling feet upward.',inP:true},
+{id:15,name:'Pike push-up',phase:'Phase 3 — Inversion',tags:['push'],tip:'Triangle position. Shift weight forward. Elbows tucked over wrists. Head falls in front of hands at bottom.',inP:true},
+{id:16,name:'L-sit',phase:'Phase 3 — Inversion',tags:['core','push'],tip:'Scapular depression + hip flexor compression. Tuck → one leg → both. On dip bars.',inP:true},
+{id:17,name:'Compact leg lifts',phase:'Phase 3 — Inversion',tags:['core'],tip:'Sit and lift legs with hands at knee level. Essential core compression most people skip.',inP:true},
+{id:18,name:'Tuck back lever',phase:'Phase 3 — Inversion',tags:['pull'],tip:'Like German hang but held horizontally. Shoulder extension strength. Progress slowly.',inP:false},
+{id:19,name:'Archer push-up',phase:'Phase 4 — Advanced Pushing',tags:['push'],tip:'One arm pushes while other extends straight to side. Regression for one-arm push-up.',inP:false},
+{id:20,name:'Tuck planche',phase:'Phase 4 — Advanced Pushing',tags:['push'],tip:'Full straight-arm pushing skill. Torso high, elbows locked, hips level. Use bands to build.',inP:false},
+{id:21,name:'Banded muscle-up',phase:'Phase 4 — Advanced Pushing',tags:['pull','push'],tip:'Need 8–10 clean pull-ups first. Heavy band to avoid chicken-winging. Hollow body not arched.',inP:false},
+{id:22,name:'Straddle sit',phase:'Phase 4 — Advanced Pushing',tags:['core'],tip:'Advanced L-sit, legs spread wide. Requires significant hamstring flexibility beyond regular L-sit.',inP:false},
+{id:23,name:'Reverse nordic',phase:'Phase 4 — Advanced Pushing',tags:['mobility'],tip:'Kneel and lean back slowly. Bodyweight quad strengthening and stretching.',inP:false},
+{id:24,name:'Shoulder stand',phase:'Phase 5 — Inversions Advanced',tags:['balance','push'],tip:'Builds end-range strength for handstand push-ups.',inP:false},
+{id:25,name:'Freestanding handstand',phase:'Phase 5 — Inversions Advanced',tags:['balance'],tip:'Shoulders pressed over ears, tilted pelvis. Finger pressure is your balance tool.',inP:true},
+{id:26,name:'Muscle-up',phase:'Phase 5 — Inversions Advanced',tags:['pull','push'],tip:'Dynamic explosive pull. Hollow body — not arched. Transition = forward lean and elbow rotation.',inP:false},
+{id:27,name:'Advanced tuck front lever',phase:'Phase 5 — Inversions Advanced',tags:['pull'],tip:'From tight tuck, move knees to 90° over hips. Increases lat load significantly.',inP:false},
+{id:28,name:'Handstand push-up',phase:'Phase 5 — Inversions Advanced',tags:['push'],tip:'Combines shoulder stand and pike push-up into full vertical pressing. Requires solid freestanding HS first.',inP:false},
+];
+const SP=[{name:'Handstand hold',unit:'seconds',target:45,start:8},{name:'L-sit hold',unit:'seconds',target:15,start:4},{name:'Pull-ups',unit:'reps',target:15,start:10},{name:'Pike push-ups',unit:'reps',target:15,start:10}];
+
+let S={
+  program:JSON.parse(localStorage.getItem('tl2_prog')||'null')||JSON.parse(JSON.stringify(DP)),
+  exDone:JSON.parse(localStorage.getItem('tl2_ed')||'{}'),
+  setsDone:JSON.parse(localStorage.getItem('tl2_sd')||'{}'),
+  exNotes:JSON.parse(localStorage.getItem('tl2_en')||'{}'),
+  milestones:JSON.parse(localStorage.getItem('tl2_ms')||'{}'),
+  skillsDone:JSON.parse(localStorage.getItem('tl2_sk')||'[]'),
+  sh:JSON.parse(localStorage.getItem('tl2_sh')||'{}'),
+  logs:JSON.parse(localStorage.getItem('tl2_lg')||'[]'),
+  activeDay:DO[Math.min(Math.max(new Date().getDay()-1,0),4)]||'Monday',
+  oc:{},osk:{},sf:'All',editEx:null,addDay:null,addSec:null
+};
+
+function sv(){localStorage.setItem('tl2_prog',JSON.stringify(S.program));localStorage.setItem('tl2_ed',JSON.stringify(S.exDone));localStorage.setItem('tl2_sd',JSON.stringify(S.setsDone));localStorage.setItem('tl2_en',JSON.stringify(S.exNotes));localStorage.setItem('tl2_ms',JSON.stringify(S.milestones));localStorage.setItem('tl2_sk',JSON.stringify(S.skillsDone));localStorage.setItem('tl2_sh',JSON.stringify(S.sh));localStorage.setItem('tl2_lg',JSON.stringify(S.logs));}
+function tk(){return new Date().toISOString().slice(0,10);}
+function ds(){return new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}).toUpperCase();}
+function pSets(s){const m=s.match(/^(\d+)\s*[×x]/);return m?parseInt(m[1]):0;}
+function dayPct(d){const secs=S.program[d]?.sections||{};let t=0,dn=0;Object.values(secs).forEach(es=>es.forEach(e=>{t++;if(S.exDone[e.id])dn++;}));return t>0?Math.round((dn/t)*100):0;}
+
+function showScreen(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+n).classList.add('active');
+  document.getElementById('nav-'+n).classList.add('active');
+  if(n==='train')renderTrain();
+  if(n==='skills')renderSkills();
+  if(n==='progress')renderProgress();
+}
+
+function renderTrain(){
+  document.getElementById('train-date').textContent=ds();
+  document.getElementById('dayStrip').innerHTML=DO.map(d=>{
+    const p=dayPct(d);
+    return`<button class="dt ${d===S.activeDay?'active':''}" onclick="selDay('${d}')">${d.slice(0,3)}<span class="p">${p>0?p+'%':''}</span></button>`;
+  }).join('');
+  const day=S.program[S.activeDay];
+  const pct=dayPct(S.activeDay);
+  const r=22,circ=2*Math.PI*r,off=circ-(pct/100)*circ;
+  let h=`<div class="sbanner"><div class="sring"><svg viewBox="0 0 52 52"><circle class="rbg" cx="26" cy="26" r="${r}"/><circle class="rfill" cx="26" cy="26" r="${r}" stroke-dasharray="${circ.toFixed(2)}" stroke-dashoffset="${off.toFixed(2)}"/></svg><div class="rlbl">${pct}%</div></div><div class="sinfo"><div class="sday">${S.activeDay}</div><div class="sfocus">${day.focus}</div><div class="snote">${day.note}</div></div></div>`;
+  h+=`<div class="wu"><span class="wu-tag">Warm-up</span><div class="wu-items">${day.warmup.join(' · ')}</div></div>`;
+  Object.entries(day.sections).forEach(([sn,exs])=>{
+    const isSk=sn.toLowerCase().includes('skill')||sn.toLowerCase().includes('opener');
+    h+=`<div class="slbl ${isSk?'sk':''}">${sn}<button onclick="oAddEx('${S.activeDay}','${sn}')" style="background:var(--bk);color:var(--wh);border:none;border-radius:2px;font-family:var(--fm);font-size:9px;letter-spacing:.06em;padding:3px 8px;cursor:pointer;text-transform:uppercase;">+Add</button></div><div class="exlist">`;
+    exs.forEach((ex,ei)=>{
+      const done=!!S.exDone[ex.id],msDone=ex.milestone?!!S.milestones[ex.id]:false,open=!!S.oc[ex.id];
+      const ns=pSets(ex.sets),sets=S.setsDone[ex.id]||[],nv=S.exNotes[ex.id]||ex.note||'';
+      h+=`<div class="ec ${(isSk||ex.skill)?'sk':''} ${done?'cp':''}"><div class="etop"><div class="ecirc ${done?'done':''}" onclick="togED('${ex.id}')"></div><div class="ebody" onclick="togC('${ex.id}')"><div class="ename ${done?'done':''}">${ex.name}</div><div class="epills"><span class="pill p-sets">${ex.sets}</span>${(isSk||ex.skill)?'<span class="pill p-sk">skill</span>':''}${ex.superset?'<span class="pill p-ss">superset</span>':''}${ex.milestone&&!msDone?'<span class="pill p-ms">milestone</span>':''}${ex.milestone&&msDone?'<span class="pill p-msd">achieved</span>':''}</div></div><span class="echev ${open?'open':''}" onclick="togC('${ex.id}')">▾</span></div><div class="edet ${open?'open':''}"><div class="etip">${ex.tip||''}</div>${ns>0?`<div class="setsrow">${Array.from({length:ns},(_,si)=>`<div class="setbox ${sets.includes(si)?'done':''}" onclick="togSet('${ex.id}',${si},${ns})">S${si+1}</div>`).join('')}</div>`:''} ${ex.milestone?`<div class="msbox"><div class="mslbl">Milestone</div><div class="msrow"><div class="mscheck ${msDone?'done':''}" onclick="togMs('${ex.id}')"></div><span class="mstxt ${msDone?'done':''}">${ex.milestone}</span></div></div>`:''}<textarea class="enote" placeholder="Session note..." onchange="svNote('${ex.id}',this.value)">${nv}</textarea><div class="eacts"><button class="ebtn" onclick="oEditEx('${S.activeDay}','${sn}',${ei})">Edit</button><button class="ebtn del" onclick="delEx('${S.activeDay}','${sn}',${ei})">Remove</button></div></div></div>`;
+    });
+    h+='</div>';
+  });
+  document.getElementById('sessionContent').innerHTML=h;
+}
+
+function selDay(d){S.activeDay=d;S.oc={};renderTrain();}
+function togED(id){S.exDone[id]=!S.exDone[id];updSH();sv();renderTrain();}
+function togSet(id,si,tot){if(!S.setsDone[id])S.setsDone[id]=[];const p=S.setsDone[id].indexOf(si);if(p>-1)S.setsDone[id].splice(p,1);else S.setsDone[id].push(si);if(S.setsDone[id].length===tot)S.exDone[id]=true;updSH();sv();renderTrain();}
+function togMs(id){S.milestones[id]=!S.milestones[id];sv();renderTrain();}
+function togC(id){S.oc[id]=!S.oc[id];renderTrain();}
+function svNote(id,v){S.exNotes[id]=v;sv();}
+function updSH(){const secs=S.program[S.activeDay].sections;let t=0,dn=0;Object.values(secs).forEach(es=>es.forEach(e=>{t++;if(S.exDone[e.id])dn++;}));const p=t>0?Math.round((dn/t)*100):0;S.sh[tk()]={pct:p,done:dn,total:t,day:S.activeDay};}
+function oAddEx(d,sec){S.editEx=null;S.addDay=d;S.addSec=sec;document.getElementById('new-ex-name').value='';document.getElementById('new-ex-sets').value='';document.getElementById('new-ex-tip').value='';document.getElementById('new-ex-ms').value='';document.getElementById('new-ex-section').value=sec;openModal('modal-ex');}
+function oEditEx(d,sec,idx){const ex=S.program[d].sections[sec][idx];S.editEx={d,sec,idx};document.getElementById('new-ex-name').value=ex.name;document.getElementById('new-ex-sets').value=ex.sets;document.getElementById('new-ex-tip').value=ex.tip||'';document.getElementById('new-ex-ms').value=ex.milestone||'';openModal('modal-ex');}
+function saveExercise(){const name=document.getElementById('new-ex-name').value.trim(),sets=document.getElementById('new-ex-sets').value.trim(),tip=document.getElementById('new-ex-tip').value.trim(),ms=document.getElementById('new-ex-ms').value.trim(),sec=document.getElementById('new-ex-section').value;if(!name||!sets)return;if(S.editEx){const ex=S.program[S.editEx.d].sections[S.editEx.sec][S.editEx.idx];Object.assign(ex,{name,sets,tip,milestone:ms||undefined});}else{const d=S.addDay||S.activeDay;if(!S.program[d].sections[sec])S.program[d].sections[sec]=[];S.program[d].sections[sec].push({id:'u'+Date.now(),name,sets,tip,milestone:ms||undefined,skill:false,note:''});}sv();closeModal('modal-ex');renderTrain();}
+function delEx(d,sec,idx){if(confirm('Remove this exercise?')){S.program[d].sections[sec].splice(idx,1);sv();renderTrain();}}
+
+function renderSkills(){
+  const tot=SD.length,dn=S.skillsDone.length;
+  document.getElementById('skills-sub').textContent=`${dn} of ${tot} skills unlocked — ${Math.round((dn/tot)*100)}%`;
+  const filters=['All','Done','In program','push','pull','core','balance','mobility'];
+  document.getElementById('skillFilters').innerHTML=filters.map(f=>`<button class="sfb ${S.sf===f?'active':''}" onclick="setSF('${f}')">${f}</button>`).join('');
+  let filt=SD;
+  if(S.sf==='Done')filt=SD.filter(s=>S.skillsDone.includes(s.id));
+  else if(S.sf==='In program')filt=SD.filter(s=>s.inP);
+  else if(['push','pull','core','balance','mobility'].includes(S.sf))filt=SD.filter(s=>s.tags.includes(S.sf));
+  const phases=[...new Set(filt.map(s=>s.phase))];
+  document.getElementById('skillList').innerHTML=phases.map(ph=>{
+    const skills=filt.filter(s=>s.phase===ph),dinph=skills.filter(s=>S.skillsDone.includes(s.id)).length;
+    return`<div class="sphase"><span>${ph}</span><span>${dinph}/${skills.length}</span></div>${skills.map(s=>{const done=S.skillsDone.includes(s.id),open=!!S.osk[s.id];return`<div class="skc ${done?'skdone':''}"><div class="skrow"><div class="skcheck ${done?'done':''}" onclick="togSk(${s.id})"></div><div class="skbody" onclick="togSkC(${s.id})"><div class="skname ${done?'done':''}">${s.name}</div><div class="sktags">${s.tags.map(t=>`<span class="skt ${t}">${t}</span>`).join('')}${s.inP?'<span class="skt inp">in program</span>':''}</div></div><span class="echev ${open?'open':''}" onclick="togSkC(${s.id})">▾</span></div><div class="skdet ${open?'open':''}"><div class="sktip">${s.tip}</div></div></div>`;}).join('')}`;
+  }).join('');
+}
+function togSk(id){if(S.skillsDone.includes(id))S.skillsDone=S.skillsDone.filter(d=>d!==id);else S.skillsDone.push(id);sv();renderSkills();}
+function togSkC(id){S.osk[id]=!S.osk[id];renderSkills();}
+function setSF(f){S.sf=f;renderSkills();}
+
+function renderProgress(){
+  document.getElementById('prog-date').textContent=ds();
+  const sh=S.sh,today=new Date();
+  let streak=0;
+  for(let i=0;i<60;i++){const d=new Date(today);d.setDate(d.getDate()-i);const dow=d.getDay();if(dow===0||dow===6)continue;const key=d.toISOString().slice(0,10);if(sh[key]&&sh[key].pct>=50)streak++;else if(i>0)break;}
+  let t4=0,c4=0;
+  for(let i=0;i<28;i++){const d=new Date(today);d.setDate(d.getDate()-i);if(d.getDay()===0||d.getDay()===6)continue;t4++;const key=d.toISOString().slice(0,10);if(sh[key]&&sh[key].pct>=50)c4++;}
+  const rate=t4>0?Math.round((c4/t4)*100):0;
+  let msT=0,msD=0;
+  DO.forEach(day=>Object.values(S.program[day].sections).forEach(es=>es.forEach(e=>{if(e.milestone){msT++;if(S.milestones[e.id])msD++;}})));
+  const skD=S.skillsDone.length;
+  document.getElementById('kpiGrid').innerHTML=`<div class="kpi"><div class="kl">Streak</div><div class="kv">${streak}<span class="ku"> days</span></div><div class="ks">weekdays only</div></div><div class="kpi"><div class="kl">4-week rate</div><div class="kv">${rate}<span class="ku">%</span></div><div class="ks">${c4}/${t4} sessions</div></div><div class="kpi"><div class="kl">Milestones</div><div class="kv">${msD}<span class="ku"> / ${msT}</span></div><div class="kb"><div class="kbf" style="width:${msT>0?Math.round((msD/msT)*100):0}%"></div></div></div><div class="kpi"><div class="kl">Skills</div><div class="kv">${skD}<span class="ku"> / 28</span></div><div class="kb"><div class="kbf" style="width:${Math.round((skD/28)*100)}%"></div></div></div>`;
+  const dots=[];
+  for(let i=27;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-i);if(d.getDay()===0||d.getDay()===6)continue;const key=d.toISOString().slice(0,10);const e=sh[key];dots.push({done:e&&e.pct>=50,partial:e&&e.pct>0&&e.pct<50,today:key===tk()});}
+  document.getElementById('dotGrid').innerHTML=dots.map(d=>`<div class="dot ${d.done?'done':d.partial?'partial':''} ${d.today?'today':''}"></div>`).join('');
+  const dc={};DO.forEach(d=>{dc[d]={done:0,total:0};});
+  Object.entries(sh).forEach(([key,val])=>{const dow=new Date(key).getDay();const dn=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][dow];if(dc[dn]){dc[dn].total++;if(val.pct>=50)dc[dn].done++;}});
+  document.getElementById('trainBars').innerHTML=DO.map(d=>{const{done,total}=dc[d];const p=total>0?Math.round((done/total)*100):0;return`<div class="prow"><div class="phead"><span class="pname">${d}</span><span class="pval">${p}% (${done}/${total})</span></div><div class="pbg"><div class="pfill" style="width:${p}%"></div></div><div class="psub">${S.program[d]?.focus||''}</div></div>`;}).join('');
+  document.getElementById('skillBars').innerHTML=SP.map(sk=>{const logs=S.logs.filter(l=>l.metric===sk.name+' ('+sk.unit+')');const cur=logs.length?parseFloat(logs[logs.length-1].value):sk.start;const p=Math.min(100,Math.round((cur/sk.target)*100));return`<div class="prow"><div class="phead"><span class="pname">${sk.name}</span><span class="pval">${cur} / ${sk.target} ${sk.unit}</span></div><div class="pbg"><div class="pfill" style="width:${p}%"></div></div></div>`;}).join('');
+  const recent=[...S.logs].reverse().slice(0,12);
+  document.getElementById('logList').innerHTML=recent.length?recent.map(l=>`<div class="lentry"><div class="ldate">${l.date}</div><div class="lbody"><div class="lmet">${l.metric}</div><div class="lval">${l.value}${l.note?' — '+l.note:''}</div></div></div>`).join(''):'<div class="empty">No entries yet. Tap + to log your first session.</div>';
+}
+function openLogModal(){openModal('modal-log');}
+function saveLog(){const metric=document.getElementById('log-metric').value,value=document.getElementById('log-val').value,note=document.getElementById('log-note').value;if(!value)return;const date=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'});S.logs.push({metric,value,note,date,ts:Date.now()});sv();closeModal('modal-log');renderProgress();}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.mo').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)closeModal(el.id);}));
+renderTrain();
+</script>
+</body>
+</html>
